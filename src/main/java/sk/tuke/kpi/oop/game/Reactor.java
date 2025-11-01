@@ -7,7 +7,7 @@ import sk.tuke.kpi.oop.game.tools.FireExtinguisher;
 import sk.tuke.kpi.oop.game.tools.Hammer;
 import sk.tuke.kpi.oop.game.actions.PerpetualReactorHeating;
 
-public class Reactor extends AbstractActor {
+public class Reactor extends AbstractActor implements Switchable {
     private int temperature;
     private int damage;
     private Light light;
@@ -29,6 +29,11 @@ public class Reactor extends AbstractActor {
     public int getTemperature() { return temperature; }
     public boolean isRunning() { return isRunning; }
 
+    @Override
+    public boolean isOn() {
+        return isRunning();
+    }
+
     public void increaseTemperature(int increment) {
         if (damage >= 100 || increment <= 0 || !isRunning) return;
         temperature += (int) Math.ceil(increment * (damage <= 33 ? 1.0 : damage <= 66 ? 1.5 : 2.0));
@@ -46,12 +51,14 @@ public class Reactor extends AbstractActor {
         updateElectricityFlow();
     }
 
+    @Override
     public void turnOn() {
         if (damage < 100) isRunning = true;
         updateAnimation();
         updateElectricityFlow();
     }
 
+    @Override
     public void turnOff() {
         isRunning = false;
         updateAnimation();
