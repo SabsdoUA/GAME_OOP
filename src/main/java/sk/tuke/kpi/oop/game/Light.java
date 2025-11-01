@@ -13,6 +13,15 @@ public class Light extends AbstractActor {
         updateAnimation();
     }
 
+    public void setPowered(boolean powered) {
+        isOn = powered;
+        updateAnimation();
+    }
+
+    public boolean isOn() {
+        return isOn;
+    }
+
     public void setElectricityFlow(boolean flow) {
         electricityFlow = flow;
         updateAnimation();
