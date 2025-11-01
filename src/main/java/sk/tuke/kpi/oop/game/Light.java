@@ -1,25 +1,53 @@
 package sk.tuke.kpi.oop.game;
+
 import sk.tuke.kpi.gamelib.framework.AbstractActor;
 import sk.tuke.kpi.gamelib.graphics.Animation;
 
-public class Light extends AbstractActor {
+public class Light extends AbstractActor implements Switchable {
     private boolean isOn;
     private boolean electricityFlow;
 
-    public Light() { updateAnimation(); }
+    public Light() {
+        updateAnimation();
+    }
 
     public void toggle() {
-        isOn = !isOn;
+        if (isOn) {
+            turnOff();
+        } else {
+            turnOn();
+        }
+    }
+
+    @Override
+    public void turnOn() {
+        if (isOn) {
+            return;
+        }
+        isOn = true;
         updateAnimation();
+    }
+
+    @Override
+    public void turnOff() {
+        if (!isOn) {
+            return;
+        }
+        isOn = false;
+        updateAnimation();
+    }
+
+    @Override
+    public boolean isOn() {
+        return isOn;
     }
 
     public void setPowered(boolean powered) {
-        isOn = powered;
-        updateAnimation();
-    }
-
-    public boolean isOn() {
-        return isOn;
+        if (powered) {
+            turnOn();
+        } else {
+            turnOff();
+        }
     }
 
     public void setElectricityFlow(boolean flow) {

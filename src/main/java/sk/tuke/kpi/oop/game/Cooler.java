@@ -8,7 +8,7 @@ import sk.tuke.kpi.gamelib.framework.AbstractActor;
 import sk.tuke.kpi.gamelib.framework.actions.Loop;
 import sk.tuke.kpi.gamelib.graphics.Animation;
 
-public class Cooler extends AbstractActor {
+public class Cooler extends AbstractActor implements Switchable {
     private Reactor reactor;
     private boolean isOn;
     private static final String FAN_SPRITE = "sprites/fan.png";
@@ -29,8 +29,14 @@ public class Cooler extends AbstractActor {
         setAnimation(fanAnimation);
     }
 
-    public Reactor getReactor() { return reactor; }
-    public boolean isOn() { return isOn; }
+    public Reactor getReactor() {
+        return reactor;
+    }
+
+    @Override
+    public boolean isOn() {
+        return isOn;
+    }
 
     public void setReactor(Reactor reactor) {
         this.reactor = reactor;
@@ -39,6 +45,7 @@ public class Cooler extends AbstractActor {
         }
     }
 
+    @Override
     public void turnOn() {
         if (isOn) return;
         isOn = true;
@@ -48,6 +55,7 @@ public class Cooler extends AbstractActor {
         coolReactor();
     }
 
+    @Override
     public void turnOff() {
         if (!isOn) return;
         isOn = false;

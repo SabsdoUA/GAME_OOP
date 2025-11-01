@@ -20,14 +20,21 @@ public class Gameplay extends Scenario {
         Reactor reactor = placeReactor(scene, 64, 64);
         DefectiveLight light = installWarningLight(scene, reactor, 64, 96);
         SmartCooler smartCooler = installSmartCooler(scene, reactor, 96, 64);
-        Controller controller = installController(scene, reactor, 32, 64);
+        PowerSwitch reactorSwitch = installPowerSwitch(scene, reactor, 32, 64);
+        Cooler auxiliaryCooler = installCooler(scene, reactor, 160, 64);
+        PowerSwitch coolerSwitch = installPowerSwitch(scene, auxiliaryCooler, 160, 32);
+        Light ceilingLight = installLight(scene, 32, 192);
+        ceilingLight.setElectricityFlow(true);
+        PowerSwitch lightSwitch = installPowerSwitch(scene, ceilingLight, 32, 224);
         Computer computer = installComputer(scene, 64, 128);
         Hammer hammer = placeHammer(scene, 160, 64);
         FireExtinguisher extinguisher = placeExtinguisher(scene, 192, 64);
 
         scheduleTemperatureEvents(reactor);
         scheduleElectricNetwork(reactor, light, computer);
-        scheduleMaintenanceActions(reactor, smartCooler, controller, hammer, extinguisher, computer);
+        scheduleMaintenanceActions(reactor, smartCooler, reactorSwitch, hammer, extinguisher, computer);
+        scheduleSwitchCycle(coolerSwitch, 2f, 3f, 2f);
+        scheduleSwitchCycle(lightSwitch, 1f, 1.5f, 1.5f);
     }
 
     private Reactor placeReactor(Scene scene, int x, int y) {
@@ -50,10 +57,22 @@ public class Gameplay extends Scenario {
         return smartCooler;
     }
 
-    private Controller installController(Scene scene, Reactor reactor, int x, int y) {
-        Controller controller = new Controller(reactor);
-        scene.addActor(controller, x, y);
-        return controller;
+    private PowerSwitch installPowerSwitch(Scene scene, Switchable device, int x, int y) {
+        PowerSwitch powerSwitch = new PowerSwitch(device);
+        scene.addActor(powerSwitch, x, y);
+        return powerSwitch;
+    }
+
+    private Cooler installCooler(Scene scene, Reactor reactor, int x, int y) {
+        Cooler cooler = new Cooler(reactor);
+        scene.addActor(cooler, x, y);
+        return cooler;
+    }
+
+    private Light installLight(Scene scene, int x, int y) {
+        Light light = new Light();
+        scene.addActor(light, x, y);
+        return light;
     }
 
     private Computer installComputer(Scene scene, int x, int y) {
@@ -102,7 +121,7 @@ public class Gameplay extends Scenario {
     private void scheduleMaintenanceActions(
         Reactor reactor,
         SmartCooler smartCooler,
-        Controller controller,
+        PowerSwitch reactorSwitch,
         Hammer hammer,
         FireExtinguisher extinguisher,
         Computer computer
@@ -121,13 +140,13 @@ public class Gameplay extends Scenario {
             ).scheduleFor(reactor);
         }
 
-        if (controller != null) {
+        if (reactorSwitch != null) {
             new ActionSequence<>(
                 new Wait<>(8f),
-                new Invoke<>(controller::toggle),
+                new Invoke<>(reactorSwitch::switchOff),
                 new Wait<>(5f),
-                new Invoke<>(controller::toggle)
-            ).scheduleFor(controller);
+                new Invoke<>(reactorSwitch::switchOn)
+            ).scheduleFor(reactorSwitch);
         }
 
         if (smartCooler != null) {
@@ -147,5 +166,22 @@ public class Gameplay extends Scenario {
                 new Invoke<>(() -> computer.setPowered(false))
             ).scheduleFor(reactor);
         }
+    }
+
+    private void scheduleSwitchCycle(PowerSwitch powerSwitch, float initialDelay, float onDuration, float offDuration) {
+        if (powerSwitch == null) {
+            return;
+        }
+        new ActionSequence<>(
+            new Wait<>(initialDelay),
+            new Loop<>(
+                new ActionSequence<>(
+                    new Invoke<>(powerSwitch::switchOn),
+                    new Wait<>(onDuration),
+                    new Invoke<>(powerSwitch::switchOff),
+                    new Wait<>(offDuration)
+                )
+            )
+        ).scheduleFor(powerSwitch);
     }
 }
