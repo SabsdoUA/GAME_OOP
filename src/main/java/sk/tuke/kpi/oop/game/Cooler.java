@@ -4,7 +4,6 @@ import sk.tuke.kpi.gamelib.Scene;
 import sk.tuke.kpi.gamelib.actions.ActionSequence;
 import sk.tuke.kpi.gamelib.actions.Invoke;
 import sk.tuke.kpi.gamelib.actions.Wait;
-import sk.tuke.kpi.gamelib.actions.When;
 import sk.tuke.kpi.gamelib.framework.AbstractActor;
 import sk.tuke.kpi.gamelib.framework.actions.Loop;
 import sk.tuke.kpi.gamelib.graphics.Animation;
@@ -35,22 +34,32 @@ public class Cooler extends AbstractActor {
 
     public void setReactor(Reactor reactor) {
         this.reactor = reactor;
+        if (isOn) {
+            coolReactor();
+        }
     }
 
     public void turnOn() {
+        if (isOn) return;
         isOn = true;
-        getAnimation().play();
+        if (getAnimation() != null) {
+            getAnimation().play();
+        }
+        coolReactor();
     }
 
     public void turnOff() {
+        if (!isOn) return;
         isOn = false;
-        getAnimation().stop();
+        if (getAnimation() != null) {
+            getAnimation().stop();
+        }
     }
 
     @Override
     public void addedToScene(Scene scene) {
         super.addedToScene(scene);
-        new Loop<>(new When<>(() -> isOn, new ActionSequence<>(new Wait<>(COOLING_INTERVAL), new Invoke<>(this::coolReactor)))).scheduleFor(this);
+        new Loop<>(new ActionSequence<>(new Wait<>(COOLING_INTERVAL), new Invoke<>(this::coolReactor))).scheduleFor(this);
     }
 
     private void coolReactor() {
